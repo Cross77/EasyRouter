@@ -1,11 +1,10 @@
 /// <reference path="./libts/jquery.d.ts"/>
 /// <reference path="./KeyedCollection.ts"/>
-define(["require", "exports", "jquery", "./KeyedCollection.js"], function (require, exports, $, KeyedCollection_js_1) {
+define(["require", "exports", "./KeyedCollection.js"], function (require, exports, KeyedCollection_js_1) {
     "use strict";
     exports.__esModule = true;
     var EasyRouter = (function () {
-        function EasyRouter(greeting) {
-            this.greeting = greeting;
+        function EasyRouter() {
             this.routes = new KeyedCollection_js_1.KeyedCollection();
             var scope = this;
             $('a').on('click.redirect', function () {

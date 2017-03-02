@@ -1,29 +1,25 @@
 define(["require", "exports", "./EasyRouter.js"], function (require, exports, EasyRouter_js_1) {
     "use strict";
     exports.__esModule = true;
-    var _app = new EasyRouter_js_1.EasyRouter("Working!");
+    var _app = new EasyRouter_js_1.EasyRouter();
     _app.setPrefix('EasyRouter');
     _app.route('/samples/news.html', 'front', function () {
         alert('news loaded');
-        document.getElementsByClassName("test")[0].innerHTML = _app.greet();
     }, function () {
         alert('news unloaded');
     });
     _app.route('/samples/article.html', 'front', function () {
         alert('article loaded');
-        document.getElementsByClassName("test")[0].innerHTML = _app.greet();
     }, function () {
         alert('article unloaded');
     });
     _app.route('/samples/login.html', 'another', function () {
         alert('login loaded');
-        document.getElementsByClassName("test")[0].innerHTML = _app.greet();
     }, function () {
         alert('login unloaded');
     });
     _app.route('/samples/register.html', 'another', function () {
         alert('register loaded');
-        document.getElementsByClassName("test")[0].innerHTML = _app.greet();
     }, function () {
         alert('register unloaded');
     });

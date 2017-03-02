@@ -1,7 +1,7 @@
 /// <reference path="./libts/jquery.d.ts"/>
 /// <reference path="./KeyedCollection.ts"/>
 
-import * as $ from "jquery";
+//import * as $ from "jquery";
 import { KeyedCollection } from './KeyedCollection.js';
 
 interface IRoute{
@@ -55,7 +55,7 @@ export class EasyRouter {
                 console.warn(url + ' ajax fail');
             });
     }
-    constructor(public greeting: string) {
+    constructor() {
         this.routes = new KeyedCollection< Array <IRoute> >();
         var scope = this;
         $('a').on('click.redirect', function(){
