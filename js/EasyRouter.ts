@@ -59,7 +59,8 @@ export class EasyRouter {
         this.routes = new KeyedCollection< Array <IRoute> >();
         var scope = this;
         $('a').on('click.redirect', function(){
-            scope.redirect($(this).attr('href'));
+            var url = this.href.replace(/https?:\/\/[^\/]+/i, "");
+            scope.redirect(url);
             return false;
         });
         this.prefix = '';

@@ -8,7 +8,8 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
             this.routes = new KeyedCollection_js_1.KeyedCollection();
             var scope = this;
             $('a').on('click.redirect', function () {
-                scope.redirect($(this).attr('href'));
+                var url = this.href.replace(/https?:\/\/[^\/]+/i, "");
+                scope.redirect(url);
                 return false;
             });
             this.prefix = '';
