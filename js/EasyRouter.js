@@ -12,6 +12,7 @@ define(["require", "exports", "jquery", "./KeyedCollection.js"], function (requi
                 scope.redirect($(this).attr('href'));
                 return false;
             });
+            this.prefix = '';
             this.currentUrl = window.location.pathname;
         }
         EasyRouter.prototype.setPreloader = function (cb) {
@@ -43,12 +44,12 @@ define(["require", "exports", "jquery", "./KeyedCollection.js"], function (requi
                 console.warn(url + ' ajax fail');
             });
         };
-        EasyRouter.prototype.greet = function () {
-            return "<h2>" + this.greeting + "</h2>";
+        EasyRouter.prototype.setPrefix = function (prefix) {
+            this.prefix = prefix;
         };
         EasyRouter.prototype.route = function (_url, _group, _load, _unload) {
             var temp_route = {
-                url: _url,
+                url: this.prefix + _url,
                 group: _group,
                 load: _load,
                 unload: _unload
@@ -67,7 +68,7 @@ define(["require", "exports", "jquery", "./KeyedCollection.js"], function (requi
             var error = {
                 url: '/404',
                 load: function () {
-                    window.location.href = '/error.html';
+                    window.location.href = this.prefix + '/error.html';
                 },
                 unload: function () {
                     alert(12);

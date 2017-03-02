@@ -2,6 +2,8 @@ import { EasyRouter } from './EasyRouter.js';
 
 var _app = new EasyRouter("Working!");
 
+_app.setPrefix('EasyRouter/');
+
 _app.route('/samples/news.html', 'front', function(){
     alert('news loaded');
     document.getElementsByClassName("test")[0].innerHTML = _app.greet();

@@ -15,6 +15,8 @@ export class EasyRouter {
 
     private routes: KeyedCollection< Array< IRoute > >;
 
+    private prefix: string;
+
     private preloader: () => void;
 
     private currentUrl: string;
@@ -60,14 +62,15 @@ export class EasyRouter {
             scope.redirect($(this).attr('href'));
             return false;
         });
+        this.prefix = '';
         this.currentUrl = window.location.pathname;
     }
-    greet() {
-        return "<h2>" + this.greeting + "</h2>";
+    public setPrefix(prefix: string): void{
+        this.prefix = prefix;
     }
     public route(_url: string, _group : string, _load: () => void, _unload: () => void): void{
         var temp_route : IRoute = {
-            url: _url,
+            url: this.prefix + _url,
             group: _group,
             load: _load,
             unload: _unload
@@ -86,7 +89,7 @@ export class EasyRouter {
         var error : IRoute = {
             url: '/404',
             load: function(){
-                window.location.href = '/error.html';
+                window.location.href = this.prefix + '/error.html';
             },
             unload: function(){
                 alert(12);
