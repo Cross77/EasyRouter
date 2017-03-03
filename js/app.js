@@ -2,7 +2,7 @@ define(["require", "exports", "./EasyRouter.js"], function (require, exports, Ea
     "use strict";
     exports.__esModule = true;
     var _app = new EasyRouter_js_1.EasyRouter();
-    _app.setPrefix('EasyRouter');
+    _app.setCatalog('/EasyRouter');
     _app.route('/samples/news.html', 'front', function () {
         alert('news loaded');
     }, function () {

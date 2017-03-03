@@ -11,11 +11,20 @@ interface IRoute{
     unload: () => void
 }
 
-export class EasyRouter {
+export interface IEasyRouter {
+    setPreloader(cb: () => void):void;
+    setCatalog(catalog: string): void;
+    route(_url: string, _group : string, _load: () => void, _unload: () => void): void;
+    removeGroup(group : string): void;
+    load(url: string): void;
+}
+
+
+export class EasyRouter implements IEasyRouter {
 
     private routes: KeyedCollection< Array< IRoute > >;
 
-    private prefix: string;
+    private catalog: string;
 
     private preloader: () => void;
 
@@ -63,15 +72,15 @@ export class EasyRouter {
             scope.redirect(url);
             return false;
         });
-        this.prefix = '';
+        this.catalog = '';
         this.currentUrl = window.location.pathname;
     }
-    public setPrefix(prefix: string): void{
-        this.prefix = prefix;
+    public setCatalog(catalog: string): void{
+        this.catalog = catalog;
     }
     public route(_url: string, _group : string, _load: () => void, _unload: () => void): void{
         var temp_route : IRoute = {
-            url: this.prefix + _url,
+            url: this.catalog + _url,
             group: _group,
             load: _load,
             unload: _unload

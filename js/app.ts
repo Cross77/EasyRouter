@@ -2,7 +2,7 @@ import { EasyRouter } from './EasyRouter.js';
 
 var _app = new EasyRouter();
 
-_app.setPrefix('EasyRouter');
+_app.setCatalog('/EasyRouter');
 
 _app.route('/samples/news.html', 'front', function(){
     alert('news loaded');

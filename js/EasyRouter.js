@@ -12,7 +12,7 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
                 scope.redirect(url);
                 return false;
             });
-            this.prefix = '';
+            this.catalog = '';
             this.currentUrl = window.location.pathname;
         }
         EasyRouter.prototype.setPreloader = function (cb) {
@@ -44,12 +44,12 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
                 console.warn(url + ' ajax fail');
             });
         };
-        EasyRouter.prototype.setPrefix = function (prefix) {
-            this.prefix = prefix;
+        EasyRouter.prototype.setCatalog = function (catalog) {
+            this.catalog = catalog;
         };
         EasyRouter.prototype.route = function (_url, _group, _load, _unload) {
             var temp_route = {
-                url: this.prefix + _url,
+                url: this.catalog + _url,
                 group: _group,
                 load: _load,
                 unload: _unload
