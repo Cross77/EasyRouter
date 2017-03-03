@@ -67,7 +67,7 @@ export class EasyRouter implements IEasyRouter {
     constructor() {
         this.routes = new KeyedCollection< Array <IRoute> >();
         var scope = this;
-        $('a').on('click.redirect', function(){
+        $('a:not[href="#"]').on('click.redirect', function(){
             var url = this.href.replace(/https?:\/\/[^\/]+/i, "");
             scope.redirect(url);
             return false;
