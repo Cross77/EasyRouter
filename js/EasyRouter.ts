@@ -7,14 +7,57 @@ import { KeyedCollection } from './KeyedCollection.js';
 interface IRoute{
     url: string,
     group: string,
+    cache: string,
+    loaded: Boolean,
     load: () => void,
     unload: () => void
+    //preload: () => void
+}
+
+interface IGroupConfig{
+    name: string,
+    load: () => void,
+    unload: () => void,
+    preload: () => void
+}
+
+interface IGroup{
+    name: string,
+    routes: KeyedCollection< Array< IRoute > >,
+    load: () => void,
+    unload: () => void,
+    preload: () => void
+}
+
+class EasyRouterGroup implements IGroup{
+
+    public name: string;
+    public routes:KeyedCollection< Array< IRoute > >;
+    public load: () => void;
+    public unload: () => void;
+    public preload: () => void;
+
+    public add( route: IRoute ): void{
+
+    }
+
+    constructor() {
+
+    }
+
+}
+
+interface IConfig {
+    catalogName: string,
+    onError: (string) => void,
+    contentSelector: string,
+    onPreload: () => void,
+    onLoad: () => void
 }
 
 export interface IEasyRouter {
-    setPreloader(cb: () => void):void;
-    setCatalog(catalog: string): void;
-    route(_url: string, _group : string, _load: () => void, _unload: () => void): void;
+    setRoute(_url: string, _group : string, _load: () => void, _unload: () => void): void;
+    setGroup( Array<IRoute> );
     removeGroup(group : string): void;
     load(url: string): void;
 }
@@ -22,17 +65,13 @@ export interface IEasyRouter {
 
 export class EasyRouter implements IEasyRouter {
 
+    public version: string;
+
+    private config: IConfig;
+
     private routes: KeyedCollection< Array< IRoute > >;
 
-    private catalog: string;
-
-    private preloader: () => void;
-
     private currentUrl: string;
-
-    public setPreloader(cb: () => void):void{
-        this.preloader = cb;
-    }
 
     private getCurrent(): IRoute{
         return this.find(this.currentUrl);
@@ -40,7 +79,11 @@ export class EasyRouter implements IEasyRouter {
 
     private redirect(url: string): void{
         var newRoute = this.find(url);
-        this.preloader();
+        if(newRoute == null){
+            this.config.onError(url);
+            return;
+        }
+        this.config.onPreload();
         if(newRoute.group != this.getCurrent().group){
             window.location.href = url;
             return;
@@ -48,16 +91,17 @@ export class EasyRouter implements IEasyRouter {
         $.ajax( url )
             .done(function(data) {
                 var tempDom = $('<output>').append($.parseHTML(data));
-                var $content = $(tempDom).find('.pageType').first();
+                var $content = $(tempDom).find(this.config.contentSelector).first();
                 window.history.pushState(
                     null,
                     $(tempDom).find('title').text(),
                     url
                 );
                 if($content.length == 0){
-                    console.warn('.pageType not found');
+                    console.warn(this.config.contentSelector + 'not found');
                 }else{
-                    $('.pageType').html($content.html());
+                    this.currentUrl = url;
+                    $(this.config.contentSelector).html($content.html());
                 }
             })
             .fail(function() {
@@ -65,25 +109,39 @@ export class EasyRouter implements IEasyRouter {
             });
     }
     constructor() {
+
         this.routes = new KeyedCollection< Array <IRoute> >();
         var scope = this;
+
         $('a:not([href^=mailto], [href^="#"], [rel="norouter"])').on('click.redirect', function(){
             var url = this.href.replace(/https?:\/\/[^\/]+/i, "");
             scope.redirect(url);
             return false;
         });
-        this.catalog = '';
+
+        this.config = {
+            catalogName: '',
+            onError: function(){} ,
+            contentSelector: '.router-content',
+            onPreload: function(){},
+            onLoad: function(){}
+        };
+
+        this.version = '0.2';
+
         this.currentUrl = window.location.pathname;
     }
-    public setCatalog(catalog: string): void{
-        this.catalog = catalog;
+    public setConfig(config: IConfig): void{
+        this.config = config;
     }
-    public route(_url: string, _group : string, _load: () => void, _unload: () => void): void{
+    public setRoute(_url: string, _group : string, _load: () => void, _unload: () => void): void{
         var temp_route : IRoute = {
-            url: this.catalog + _url,
+            url: this.config.catalogName + _url,
             group: _group,
             load: _load,
-            unload: _unload
+            unload: _unload,
+            loaded: false,
+            cache: ''
         };
 
         if( ! this.routes.Isset(_group) ){
@@ -92,21 +150,13 @@ export class EasyRouter implements IEasyRouter {
             this.routes.Item(_group).push(temp_route);
         }
     }
+
+    public setGroup(routes: Array<IRoute>): void{
+
+    }
+    
     public removeGroup(group : string): void{
         this.routes.Remove(group);
-    }
-    private error(): IRoute{
-        var error : IRoute = {
-            url: '/404',
-            load: function(){
-                window.location.href = this.prefix + '/error.html';
-            },
-            unload: function(){
-                alert(12);
-            },
-            group: 'error'
-        };
-        return error;
     }
     private find(url: string): IRoute{
         for (let group of this.routes.Values()) {
@@ -115,14 +165,14 @@ export class EasyRouter implements IEasyRouter {
                     return route;
             }
         }
-        return this.error();
+        return null;
     }
     private findInGroup(url: string, group: string): IRoute{
         for (let route of this.routes[group]) {
             if(route.url == url)
                 return route;
         }
-        return this.error();
+        return null;
     }
     public load(url: string): void{
         var route: IRoute = this.find(url);

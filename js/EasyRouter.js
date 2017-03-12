@@ -3,6 +3,13 @@
 define(["require", "exports", "./KeyedCollection.js"], function (require, exports, KeyedCollection_js_1) {
     "use strict";
     exports.__esModule = true;
+    var EasyRouterGroup = (function () {
+        function EasyRouterGroup() {
+        }
+        EasyRouterGroup.prototype.add = function (route) {
+        };
+        return EasyRouterGroup;
+    }());
     var EasyRouter = (function () {
         function EasyRouter() {
             this.routes = new KeyedCollection_js_1.KeyedCollection();
@@ -12,18 +19,26 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
                 scope.redirect(url);
                 return false;
             });
-            this.catalog = '';
+            this.config = {
+                catalogName: '',
+                onError: function () { },
+                contentSelector: '.router-content',
+                onPreload: function () { },
+                onLoad: function () { }
+            };
+            this.version = '0.2';
             this.currentUrl = window.location.pathname;
         }
-        EasyRouter.prototype.setPreloader = function (cb) {
-            this.preloader = cb;
-        };
         EasyRouter.prototype.getCurrent = function () {
             return this.find(this.currentUrl);
         };
         EasyRouter.prototype.redirect = function (url) {
             var newRoute = this.find(url);
-            this.preloader();
+            if (newRoute == null) {
+                this.config.onError(url);
+                return;
+            }
+            this.config.onPreload();
             if (newRoute.group != this.getCurrent().group) {
                 window.location.href = url;
                 return;
@@ -31,28 +46,31 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
             $.ajax(url)
                 .done(function (data) {
                 var tempDom = $('<output>').append($.parseHTML(data));
-                var $content = $(tempDom).find('.pageType').first();
+                var $content = $(tempDom).find(this.config.contentSelector).first();
                 window.history.pushState(null, $(tempDom).find('title').text(), url);
                 if ($content.length == 0) {
-                    console.warn('.pageType not found');
+                    console.warn(this.config.contentSelector + 'not found');
                 }
                 else {
-                    $('.pageType').html($content.html());
+                    this.currentUrl = url;
+                    $(this.config.contentSelector).html($content.html());
                 }
             })
                 .fail(function () {
                 console.warn(url + ' ajax fail');
             });
         };
-        EasyRouter.prototype.setCatalog = function (catalog) {
-            this.catalog = catalog;
+        EasyRouter.prototype.setConfig = function (config) {
+            this.config = config;
         };
-        EasyRouter.prototype.route = function (_url, _group, _load, _unload) {
+        EasyRouter.prototype.setRoute = function (_url, _group, _load, _unload) {
             var temp_route = {
-                url: this.catalog + _url,
+                url: this.config.catalogName + _url,
                 group: _group,
                 load: _load,
-                unload: _unload
+                unload: _unload,
+                loaded: false,
+                cache: ''
             };
             if (!this.routes.Isset(_group)) {
                 this.routes.Add(_group, [temp_route]);
@@ -61,21 +79,10 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
                 this.routes.Item(_group).push(temp_route);
             }
         };
+        EasyRouter.prototype.setGroup = function (routes) {
+        };
         EasyRouter.prototype.removeGroup = function (group) {
             this.routes.Remove(group);
-        };
-        EasyRouter.prototype.error = function () {
-            var error = {
-                url: '/404',
-                load: function () {
-                    window.location.href = this.prefix + '/error.html';
-                },
-                unload: function () {
-                    alert(12);
-                },
-                group: 'error'
-            };
-            return error;
         };
         EasyRouter.prototype.find = function (url) {
             for (var _i = 0, _a = this.routes.Values(); _i < _a.length; _i++) {
@@ -86,7 +93,7 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
                         return route;
                 }
             }
-            return this.error();
+            return null;
         };
         EasyRouter.prototype.findInGroup = function (url, group) {
             for (var _i = 0, _a = this.routes[group]; _i < _a.length; _i++) {
@@ -94,7 +101,7 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
                 if (route.url == url)
                     return route;
             }
-            return this.error();
+            return null;
         };
         EasyRouter.prototype.load = function (url) {
             var route = this.find(url);
