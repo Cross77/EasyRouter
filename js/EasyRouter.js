@@ -7,7 +7,7 @@ define(["require", "exports", "./KeyedCollection.js"], function (require, export
         function EasyRouter() {
             this.routes = new KeyedCollection_js_1.KeyedCollection();
             var scope = this;
-            $('a').on('click.redirect', function () {
+            $('a:not([href^=mailto], [href^="#"], [rel="norouter"])').on('click.redirect', function () {
                 var url = this.href.replace(/https?:\/\/[^\/]+/i, "");
                 scope.redirect(url);
                 return false;
